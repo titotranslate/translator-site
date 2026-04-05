@@ -1,62 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TranslateNowAI</title>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
-    h1 { text-align: center; color: #1a73e8; }
-    textarea { width: 100%; height: 100px; margin-bottom: 10px; font-size: 16px; }
-    select, button { padding: 10px; font-size: 16px; margin-right: 5px; }
-    #result { margin-top: 20px; font-weight: bold; }
-  </style>
 </head>
 <body>
   <h1>TranslateNowAI</h1>
 
-  <textarea id="inputText" placeholder="Type text to translate..."></textarea>
+  <textarea id="text" placeholder="Type text here"></textarea><br><br>
 
-  <div>
-    <select id="language">
-      <option value="Spanish">Spanish</option>
-      <option value="French">French</option>
-      <option value="German">German</option>
-      <option value="Italian">Italian</option>
-      <option value="Japanese">Japanese</option>
-      <option value="Chinese">Chinese</option>
-    </select>
-    <button onclick="translateText()">Translate</button>
-  </div>
+  <select id="language">
+    <option value="Spanish">Spanish</option>
+    <option value="French">French</option>
+    <option value="German">German</option>
+  </select>
 
-  <div id="result">Translation will appear here...</div>
+  <br><br>
+  <button onclick="translateText()">Translate</button>
+
+  <h3 id="result"></h3>
 
   <script>
     async function translateText() {
-      const text = document.getElementById('inputText').value;
-      const language = document.getElementById('language').value;
+      const text = document.getElementById("text").value;
+      const targetLang = document.getElementById("language").value;
 
-      if (!text) { alert("Please enter text!"); return; }
+      const res = await fetch("/api/translate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          text: text,
+          targetLang: targetLang
+        })
+      });
 
-      document.getElementById('result').innerText = "Translating...";
+      const data = await res.json();
 
-      try {
-        const response = await fetch('/api/translate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, language })
-        });
-
-        const data = await response.json();
-        if (data.translation) {
-          document.getElementById('result').innerText = data.translation;
-        } else {
-          document.getElementById('result').innerText = "Error translating.";
-        }
-
-      } catch (err) {
-        console.error(err);
-        document.getElementById('result').innerText = "Error translating.";
+      if (data.translation) {
+        document.getElementById("result").innerText = data.translation;
+      } else {
+        document.getElementById("result").innerText = "Error translating";
       }
     }
   </script>
