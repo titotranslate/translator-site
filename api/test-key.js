@@ -2,13 +2,13 @@ import OpenAI from "openai";
 
 export default async function handler(req, res) {
   try {
-    // Get API key from environment variables
+    // Get API key from environment
     const apiKey = process.env.OPENAI_API_KEY;
 
     if (!apiKey) {
       return res.status(500).json({
         message: "API key is missing in environment variables!",
-        apiKeyExists: false,
+        apiKeyExists: false
       });
     }
 
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Make request to OpenAI
+    // Request translation from OpenAI
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
@@ -38,13 +38,14 @@ export default async function handler(req, res) {
 
     const translation = completion.choices[0]?.message?.content || "";
 
+    // Return translation as JSON
     return res.status(200).json({ translation });
 
   } catch (error) {
-    console.error("Error in API function:", error.message);
+    console.error("Translation function error:", error.message);
     return res.status(500).json({
       message: "Server error occurred in translation function.",
-      error: error.message,
+      error: error.message
     });
   }
 }
