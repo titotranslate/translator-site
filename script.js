@@ -1,60 +1,56 @@
-// Translate text using the new API
-async function translateText() {
-  const text = document.getElementById("inputText").value;
-  const targetLang = document.getElementById("targetLang").value;
+const inputText = document.getElementById("inputText");
+const targetLang = document.getElementById("targetLang");
+const result = document.getElementById("result");
 
-  if (!text) {
-    alert("Please enter text to translate!");
-    return;
-  }
+// Live translation as you type
+let typingTimer;
+const typingDelay = 700; // milliseconds
+
+inputText.addEventListener("input", () => {
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(translateAndSpeak, typingDelay);
+});
+
+// Translate on Enter key or button click
+inputText.addEventListener("keypress", e => {
+  if (e.key === "Enter") translateAndSpeak();
+});
+document.getElementById("translateBtn").addEventListener("click", translateAndSpeak);
+document.getElementById("speakBtn").addEventListener("click", speakText);
+
+async function translateAndSpeak() {
+  const text = inputText.value.trim();
+  if (!text) return;
 
   try {
-    const url = `/api/test-key?text=${encodeURIComponent(text)}&targetLang=${targetLang}`;
+    const url = `/api/test-key?text=${encodeURIComponent(text)}&targetLang=${targetLang.value}`;
     const response = await fetch(url);
     const data = await response.json();
 
     if (data.translation) {
-      // Remove quotes if GPT wraps text in quotes
       const cleanText = data.translation.replace(/^"|"$/g, "");
-      document.getElementById("result").innerText = cleanText;
+      result.innerText = cleanText;
+      result.dataset.detectedLang = data.detectedLang || "en";
 
-      // Save detected language for speech
-      document.getElementById("result").dataset.detectedLang = data.detectedLang || "en";
+      // Auto speak
+      speakText();
     } else {
-      document.getElementById("result").innerText = "Error: " + JSON.stringify(data);
+      result.innerText = "Error: " + JSON.stringify(data);
     }
   } catch (err) {
-    document.getElementById("result").innerText = "Request failed";
+    result.innerText = "Request failed";
     console.error("Translation error:", err);
   }
 }
 
-// Speak the translated text using browser TTS
 function speakText() {
-  const text = document.getElementById("result").innerText;
+  const text = result.innerText;
+  if (!text) return;
 
-  if (!text) {
-    alert("Nothing to speak yet!");
-    return;
-  }
+  const langMap = { en: "en-US", es: "es-ES", fr: "fr-FR", pt: "pt-BR" };
+  const detectedLang = result.dataset.detectedLang || "en";
 
-  const langMap = {
-    en: "en-US",
-    es: "es-ES",
-    fr: "fr-FR",
-    pt: "pt-BR"
-  };
-
-  const detectedLang = document.getElementById("result").dataset.detectedLang || "en";
   const speech = new SpeechSynthesisUtterance(text);
   speech.lang = langMap[detectedLang] || "en-US";
-
   window.speechSynthesis.speak(speech);
 }
-
-// Optional: press Enter to translate
-document.getElementById("inputText").addEventListener("keypress", function(e) {
-  if (e.key === "Enter") {
-    translateText();
-  }
-});
