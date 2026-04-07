@@ -1,0 +1,9 @@
+{
+  "name": "translator-site",
+  "version": "1.0.0",
+  "description": "Translation API with OpenAI",
+  "main": "index.js",
+  "dependencies": {
+    "openai": "^4.8.0"
+  }
+}
