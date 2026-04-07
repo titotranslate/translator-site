@@ -19,7 +19,7 @@ export default async function handler(req, res) {
         "Authorization": `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "user",
@@ -31,12 +31,17 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
+    // 🔥 VERY IMPORTANT: return real error if exists
+    if (!response.ok) {
+      return res.status(500).json({ error: data });
+    }
+
     const translation = data.choices?.[0]?.message?.content;
 
     res.status(200).json({ translation });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Server error" });
+    console.error("Crash:", error);
+    res.status(500).json({ error: "Server crashed" });
   }
 }
