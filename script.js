@@ -1,3 +1,4 @@
+// Translate text using the new API
 async function translateText() {
   const text = document.getElementById("inputText").value;
   const targetLang = document.getElementById("targetLang").value;
@@ -7,25 +8,28 @@ async function translateText() {
     return;
   }
 
-  const url = `https://translator-site-x47w.vercel.app/api/test-key?text=${encodeURIComponent(text)}&targetLang=${targetLang}`;
-
   try {
+    const url = `/api/test-key?text=${encodeURIComponent(text)}&targetLang=${targetLang}`;
     const response = await fetch(url);
     const data = await response.json();
 
     if (data.translation) {
-      // Clean quotes from translation
+      // Remove quotes if GPT wraps text in quotes
       const cleanText = data.translation.replace(/^"|"$/g, "");
       document.getElementById("result").innerText = cleanText;
+
+      // Save detected language for speech
+      document.getElementById("result").dataset.detectedLang = data.detectedLang || "en";
     } else {
       document.getElementById("result").innerText = "Error: " + JSON.stringify(data);
     }
-  } catch (error) {
+  } catch (err) {
     document.getElementById("result").innerText = "Request failed";
-    console.error("Translation error:", error);
+    console.error("Translation error:", err);
   }
 }
 
+// Speak the translated text using browser TTS
 function speakText() {
   const text = document.getElementById("result").innerText;
 
@@ -34,7 +38,6 @@ function speakText() {
     return;
   }
 
-  // Map short codes to proper browser voice codes
   const langMap = {
     en: "en-US",
     es: "es-ES",
@@ -42,9 +45,16 @@ function speakText() {
     pt: "pt-BR"
   };
 
-  const selectedLang = document.getElementById("targetLang").value;
+  const detectedLang = document.getElementById("result").dataset.detectedLang || "en";
   const speech = new SpeechSynthesisUtterance(text);
-  speech.lang = langMap[selectedLang] || "en-US";
+  speech.lang = langMap[detectedLang] || "en-US";
 
   window.speechSynthesis.speak(speech);
 }
+
+// Optional: press Enter to translate
+document.getElementById("inputText").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    translateText();
+  }
+});
