@@ -34,11 +34,17 @@ function speakText() {
     return;
   }
 
+  // Map short codes to proper browser voice codes
+  const langMap = {
+    en: "en-US",
+    es: "es-ES",
+    fr: "fr-FR",
+    pt: "pt-BR"
+  };
+
+  const selectedLang = document.getElementById("targetLang").value;
   const speech = new SpeechSynthesisUtterance(text);
-  
-  // Optional: set voice based on selected language
-  const lang = document.getElementById("targetLang").value;
-  speech.lang = lang;
+  speech.lang = langMap[selectedLang] || "en-US";
 
   window.speechSynthesis.speak(speech);
 }
