@@ -26,7 +26,21 @@ export default async function handler(req, res) {
       messages: [{ role: "user", content: prompt }]
     });
 
-    const json = JSON.parse(response.choices[0].message.content);
+    let rawText = response.choices[0].message.content;
+
+// Remove ```json and ``` if they exist
+rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+
+let json;
+try {
+  json = JSON.parse(rawText);
+} catch (err) {
+  // fallback if parsing fails
+  json = {
+    detectedLang: "unknown",
+    translation: rawText
+  };
+}
     return res.status(200).json({ ...json, apiKeyExists: true });
 
   } catch (err) {
