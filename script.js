@@ -1,4 +1,7 @@
-async function translateAndSpeak() {
+// Get DOM elements
+const inputText = document.getElementById("inputText"); // your text input
+const result = document.getElementById("result");       // where translation appears
+const targetLang = document.getElementById("targetLang"); // the language dropdownasync function translateAndSpeak() {
   const text = inputText.value.trim();
   if (!text) return;
 
