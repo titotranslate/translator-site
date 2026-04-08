@@ -29,3 +29,21 @@ async function translateAndSpeak() {
   }
 }
 document.getElementById("translateBtn").addEventListener("click", translateAndSpeak);
+function speakText() {
+  const text = result.innerText;
+  if (!text) return;
+
+  const langMap = {
+    en: "en-US",
+    es: "es-ES",
+    fr: "fr-FR",
+    pt: "pt-BR"
+  };
+
+  const detectedLang = result.dataset.detectedLang || targetLang.value;
+
+  const speech = new SpeechSynthesisUtterance(text);
+  speech.lang = langMap[detectedLang] || "en-US";
+
+  window.speechSynthesis.speak(speech);
+}
