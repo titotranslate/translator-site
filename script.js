@@ -47,3 +47,4 @@ function speakText() {
 
   window.speechSynthesis.speak(speech);
 }
+document.getElementById("speakBtn").addEventListener("click", speakText);
