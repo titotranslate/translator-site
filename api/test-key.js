@@ -1,53 +1,36 @@
-// /api/test-key.js
-import OpenAI from "openai";
-
 export default async function handler(req, res) {
   try {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      return res.status(200).json({
-        message: "API key NOT found!",
-        apiKeyExists: false,
-      });
+      return res.status(200).json({ message: "API key NOT found!", apiKeyExists: false });
     }
 
-    // Get query parameters
     const { text, targetLang } = req.query;
+
     if (!text || !targetLang) {
       return res.status(400).json({ message: "Missing text or targetLang" });
     }
 
-    // Initialize OpenAI client
+    // Call OpenAI API for translation & auto-detect
+    const OpenAI = require("openai");
     const openai = new OpenAI({ apiKey });
 
-    // Send request to GPT to translate and detect language
     const prompt = `
-Detect the language of the following text and translate it to ${targetLang}. 
-Return JSON only in this format: {"detectedLang": "xx", "translation": "Translated text"}
-Text: """${text}"""
-`;
+      Detect the language of the following text, then translate it to ${targetLang}.
+      Respond in JSON format: { "detectedLang": "<detected_language_code>", "translation": "<translated_text>" }
+      Text: "${text}"
+    `;
 
-    const completion = await openai.chat.completions.create({
+    const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: "user", content: prompt }]
     });
 
-    const resultText = completion.choices[0].message.content;
+    const json = JSON.parse(response.choices[0].message.content);
+    return res.status(200).json({ ...json, apiKeyExists: true });
 
-    // Parse JSON safely
-    let jsonResult;
-    try {
-      jsonResult = JSON.parse(resultText);
-    } catch (err) {
-      jsonResult = { detectedLang: "unknown", translation: resultText };
-    }
-
-    return res.status(200).json({ ...jsonResult, apiKeyExists: true });
   } catch (err) {
-    console.error("Function error:", err);
-    return res.status(500).json({
-      message: "Server error occurred in translation function.",
-      error: err.message,
-    });
+    console.error("Translation error:", err);
+    return res.status(500).json({ message: "Server error occurred in translation function.", error: err.message });
   }
 }
