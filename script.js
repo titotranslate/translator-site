@@ -28,3 +28,4 @@ async function translateAndSpeak() {
     console.error("Translation error:", err);
   }
 }
+document.getElementById("translateBtn").addEventListener("click", translateAndSpeak);
