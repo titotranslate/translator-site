@@ -68,4 +68,6 @@ function loadVoices() {
     });
 }
 
-speechSynthesis.onvoiceschanged = loadVoices;
+window.speechSynthesis.onvoiceschanged = () => {
+  loadVoices();
+};
