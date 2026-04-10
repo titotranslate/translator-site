@@ -46,13 +46,15 @@ function speakText() {
 
   const speech = new SpeechSynthesisUtterance(text);
   speech.rate = 1;
+
   const voices = speechSynthesis.getVoices();
-const selectedVoice = voices[voiceSelect.value];
-  
+  const selectedVoice = voices.find(v => v.name === voiceSelect.options[voiceSelect.selectedIndex].textContent.split(" (")[0]);
+
   if (selectedVoice) {
-  speech.voice = selectedVoice;
-}
-  speech.lang = langMap[detectedLang] || "en-US";
+    speech.voice = selectedVoice;
+  } else {
+    speech.lang = langMap[detectedLang] || "en-US";
+  }
 
   window.speechSynthesis.speak(speech);
 }
