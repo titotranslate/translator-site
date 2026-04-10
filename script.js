@@ -1,7 +1,8 @@
 // Get DOM elements
-const inputText = document.getElementById("inputText"); // your text input
-const result = document.getElementById("result");       // where translation appears
-const targetLang = document.getElementById("targetLang"); // the language dropdown
+const inputText = document.getElementById("inputText");
+const result = document.getElementById("result");
+const targetLang = document.getElementById("targetLang");
+const voiceSelect = document.getElementById("voiceSelect");
 async function translateAndSpeak() {
   const text = inputText.value.trim();
   if (!text) return;
@@ -20,6 +21,7 @@ async function translateAndSpeak() {
 
       // Auto speak
       speakText();
+      
     } else {
       result.innerText = "Error: " + JSON.stringify(data);
     }
@@ -43,8 +45,27 @@ function speakText() {
   const detectedLang = result.dataset.detectedLang || targetLang.value;
 
   const speech = new SpeechSynthesisUtterance(text);
+  const voices = speechSynthesis.getVoices();
+  const selectedVoice = voices[voiceSelect.value];
+  
+  if (selectedVoice) {
+  speech.voice = selectedVoice;
+}
   speech.lang = langMap[detectedLang] || "en-US";
 
   window.speechSynthesis.speak(speech);
 }
 document.getElementById("speakBtn").addEventListener("click", speakText);
+function loadVoices() {
+    const voices = speechSynthesis.getVoices();
+    voiceSelect.innerHTML = "";
+
+    voices.forEach((voice, index) => {
+        const option = document.createElement("option");
+        option.value = index;
+        option.textContent = `${voice.name} (${voice.lang})`;
+        voiceSelect.appendChild(option);
+    });
+}
+
+speechSynthesis.onvoiceschanged = loadVoices;
