@@ -45,6 +45,7 @@ function speakText() {
   const detectedLang = result.dataset.detectedLang || targetLang.value;
 
   const speech = new SpeechSynthesisUtterance(text);
+  speech.rate = 1;
   const voices = speechSynthesis.getVoices();
   const selectedVoice =
   voices.find(v => v.lang.toLowerCase().includes(langMap[detectedLang])) ||
