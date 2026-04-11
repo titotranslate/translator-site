@@ -50,7 +50,7 @@ function speakText() {
   const detectedLang = result.dataset.detectedLang || targetLang.value;
 
   const speech = new SpeechSynthesisUtterance(text);
-  speech.rate = 1;
+  speech.rate = parseFloat(speedRange.value);
 
   const voices = speechSynthesis.getVoices();
   const selectedVoice = voices.find(v => v.name === voiceSelect.options[voiceSelect.selectedIndex].textContent.split(" (")[0]);
