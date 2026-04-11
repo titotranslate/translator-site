@@ -53,14 +53,14 @@ function speakText() {
   speech.rate = parseFloat(speedRange.value);
 
   const voices = speechSynthesis.getVoices();
-  const selectedVoice = voices.find(v => v.name === voiceSelect.options[voiceSelect.selectedIndex].textContent.split(" (")[0]);
+  const selectedVoice = voices[voiceSelect.value];
 
   if (selectedVoice) {
     speech.voice = selectedVoice;
   } else {
     speech.lang = langMap[detectedLang] || "en-US";
   }
-
+window.speechSynthesis.cancel();
   window.speechSynthesis.speak(speech);
 }
 document.getElementById("speakBtn").addEventListener("click", speakText);
