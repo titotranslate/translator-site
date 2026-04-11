@@ -5,6 +5,9 @@ const targetLang = document.getElementById("targetLang");
 const voiceSelect = document.getElementById("voiceSelect");
 const speedRange = document.getElementById("speedRange");
 const speedValue = document.getElementById("speedValue");
+speedRange.addEventListener("input", () => {
+  speedValue.innerText = speedRange.value;
+});
 async function translateAndSpeak() {
   const text = inputText.value.trim();
   if (!text) return;
