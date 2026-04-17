@@ -1,3 +1,14 @@
+
+// ========================
+// STEP 1 — UNLOCK SPEECH
+// ========================
+function unlockSpeech() {
+  const utter = new SpeechSynthesisUtterance(" ");
+  utter.volume = 0;
+  speechSynthesis.speak(utter);
+  speechSynthesis.cancel();
+}
+
 // ========================
 // DOM ELEMENTS
 // ========================
@@ -16,7 +27,7 @@ speedRange.addEventListener("input", () => {
 });
 
 // ========================
-// TRANSLATE
+// STEP 2 — TRANSLATE FUNCTION
 // ========================
 async function translateAndSpeak() {
   const text = inputText.value.trim();
@@ -37,12 +48,8 @@ async function translateAndSpeak() {
 
     result.dataset.detectedLang = data.detectedLang || targetLang.value;
 
-    // IMPORTANT FIX:
-    speechSynthesis.cancel();
-    setTimeout(() => {
-  speechSynthesis.cancel();
-  speakText();
-}, 10);
+    // STEP 3 — speak immediately (NO DELAYS, NO CANCEL CHAINS)
+    speakText();
 
   } catch (err) {
     console.error(err);
@@ -50,12 +57,16 @@ async function translateAndSpeak() {
   }
 }
 
-document.getElementById("translateBtn").addEventListener("click", async () => {
-  await translateAndSpeak();
+// ========================
+// TRANSLATE BUTTON (STEP 2 FIX)
+// ========================
+document.getElementById("translateBtn").addEventListener("click", () => {
+  unlockSpeech();          // MUST run first
+  translateAndSpeak();     // then translate + speak
 });
 
 // ========================
-// SPEAK (SIMPLE + STABLE)
+// SPEAK FUNCTION (STABLE)
 // ========================
 function speakText() {
   const text = result.innerText;
@@ -91,7 +102,7 @@ function speakText() {
 }
 
 // ========================
-// VOICES
+// VOICE SYSTEM (FILTERED)
 // ========================
 function loadVoices() {
   const voices = speechSynthesis.getVoices();
@@ -132,6 +143,7 @@ function loadVoices() {
     voiceSelect.appendChild(option);
   });
 }
+
 // ========================
 // EVENTS
 // ========================
@@ -141,5 +153,5 @@ targetLang.addEventListener("change", loadVoices);
 
 document.getElementById("speakBtn").addEventListener("click", speakText);
 
-// init
+// INIT
 loadVoices();
