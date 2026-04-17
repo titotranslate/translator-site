@@ -102,5 +102,6 @@ speechSynthesis.onvoiceschanged = loadVoices;
 // Reload when language changes
 targetLang.addEventListener("change", loadVoices);
 
+document.getElementById("speakBtn").addEventListener("click", speakText);
 // Initial load (important for some browsers)
 loadVoices();
