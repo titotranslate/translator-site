@@ -17,22 +17,28 @@ speedRange.addEventListener("input", () => {
 });
 
 // ========================
-// VOICE LOADER (SAFE)
+// GET VOICES (SAFE)
 // ========================
-function getVoicesSafe() {
+function getVoices() {
   return new Promise(resolve => {
     let voices = speechSynthesis.getVoices();
-
-    if (voices.length > 0) {
-      resolve(voices);
-      return;
-    }
+    if (voices.length) return resolve(voices);
 
     speechSynthesis.onvoiceschanged = () => {
       resolve(speechSynthesis.getVoices());
     };
   });
 }
+
+// ========================
+// GLOBAL CACHE (IMPORTANT FIX)
+// ========================
+let cachedVoices = [];
+
+// preload voices early
+getVoices().then(v => {
+  cachedVoices = v;
+});
 
 // ========================
 // TRANSLATE FUNCTION
@@ -56,10 +62,10 @@ async function translateAndSpeak() {
 
     result.dataset.detectedLang = data.detectedLang || targetLang.value;
 
-    // IMPORTANT: force speak AFTER render + voice readiness
-    setTimeout(() => {
-      speakText();
-    }, 50);
+    // 🚨 IMPORTANT FIX:
+    // DO NOT delay speech
+    // call speak directly (no setTimeout, no async gap)
+    speakText();
 
   } catch (err) {
     console.error(err);
@@ -70,7 +76,7 @@ async function translateAndSpeak() {
 document.getElementById("translateBtn").addEventListener("click", translateAndSpeak);
 
 // ========================
-// SPEAK FUNCTION (FIXED RELIABILITY)
+// SPEAK FUNCTION (FIXED FOR MOBILE)
 // ========================
 async function speakText() {
   const text = result.innerText;
@@ -78,14 +84,14 @@ async function speakText() {
 
   speechSynthesis.cancel();
 
-  const voices = await getVoicesSafe();
+  // use cached voices first (prevents mobile delay bug)
+  let voices = cachedVoices.length ? cachedVoices : await getVoices();
+  cachedVoices = voices;
 
   const speech = new SpeechSynthesisUtterance(text);
 
-  // rate
   speech.rate = parseFloat(speedRange.value || 1);
 
-  // language map
   const langMap = {
     en: "en-US",
     es: "es-ES",
@@ -96,7 +102,6 @@ async function speakText() {
   const lang = targetLang.value;
   speech.lang = langMap[lang] || "en-US";
 
-  // voice selection (best effort)
   let selectedVoice =
     voices.find(v => v.name === voiceSelect.value) ||
     voices.find(v => v.lang.toLowerCase().startsWith(lang));
@@ -105,10 +110,8 @@ async function speakText() {
     speech.voice = selectedVoice;
   }
 
-  // IMPORTANT: small delay fixes mobile bug
-  setTimeout(() => {
-    speechSynthesis.speak(speech);
-  }, 80);
+  // 🚨 CRITICAL FIX: NO DELAY (mobile blocks delayed speak)
+  speechSynthesis.speak(speech);
 }
 
 // ========================
@@ -116,17 +119,18 @@ async function speakText() {
 // ========================
 function loadVoices() {
   const voices = speechSynthesis.getVoices();
+  cachedVoices = voices;
 
   voiceSelect.innerHTML = "";
 
-  const filteredVoices = voices.filter(voice =>
-    voice.lang.toLowerCase().startsWith(targetLang.value)
+  const filteredVoices = voices.filter(v =>
+    v.lang.toLowerCase().startsWith(targetLang.value)
   );
 
   const finalVoices = filteredVoices.length ? filteredVoices : voices;
 
-  const cleanVoices = finalVoices.filter(voice => {
-    const name = voice.name.toLowerCase();
+  const cleanVoices = finalVoices.filter(v => {
+    const name = v.name.toLowerCase();
 
     return !(
       name.includes("wobble") ||
@@ -148,10 +152,10 @@ function loadVoices() {
     );
   });
 
-  cleanVoices.forEach(voice => {
+  cleanVoices.forEach(v => {
     const option = document.createElement("option");
-    option.value = voice.name;
-    option.textContent = `${voice.name} (${voice.lang})`;
+    option.value = v.name;
+    option.textContent = `${v.name} (${v.lang})`;
     voiceSelect.appendChild(option);
   });
 }
