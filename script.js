@@ -60,7 +60,25 @@ function speakText() {
   speechSynthesis.cancel();
 
   const speech = new SpeechSynthesisUtterance(text);
-  speech.rate = parseFloat(speedRange.value);
+  const voices = speechSynthesis.getVoices();
+
+// Try to use selected voice first
+let selectedVoice = voices.find(
+  v => v.name === voiceSelect.value
+);
+
+// If no selection, pick a good default for the language
+if (!selectedVoice) {
+  selectedVoice = voices.find(v =>
+    v.lang.toLowerCase().startsWith(targetLang.value)
+  );
+}
+
+// Apply voice if found
+if (selectedVoice) {
+  speech.voice = selectedVoice;
+}
+ speech.rate = parseFloat(speedRange.value || 1);
 
   // Try to match language
   const langMap = {
@@ -72,7 +90,9 @@ function speakText() {
 
   speech.lang = langMap[targetLang.value] || "en-US";
 
+ setTimeout(() => {
   speechSynthesis.speak(speech);
+}, 100);
 }
 
 // ========================
