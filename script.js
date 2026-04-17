@@ -1,3 +1,4 @@
+
 // ========================
 // DOM ELEMENTS
 // ========================
@@ -8,10 +9,30 @@ const voiceSelect = document.getElementById("voiceSelect");
 const speedRange = document.getElementById("speedRange");
 const speedValue = document.getElementById("speedValue");
 
-// Speed display update
+// ========================
+// SPEED DISPLAY
+// ========================
 speedRange.addEventListener("input", () => {
   speedValue.innerText = speedRange.value;
 });
+
+// ========================
+// WAIT FOR VOICES (IMPORTANT FIX)
+// ========================
+function waitForVoices() {
+  return new Promise(resolve => {
+    let voices = speechSynthesis.getVoices();
+
+    if (voices.length) {
+      resolve(voices);
+      return;
+    }
+
+    speechSynthesis.onvoiceschanged = () => {
+      resolve(speechSynthesis.getVoices());
+    };
+  });
+}
 
 // ========================
 // TRANSLATE FUNCTION
@@ -32,8 +53,8 @@ async function translateAndSpeak() {
       // store detected language
       result.dataset.detectedLang = data.detectedLang || targetLang.value;
 
-      // auto speak
-      speakText();
+      // auto speak (FIXED)
+      speakText().catch(console.error);
 
     } else {
       result.innerText = "Error: " + JSON.stringify(data);
@@ -48,18 +69,19 @@ async function translateAndSpeak() {
 document.getElementById("translateBtn").addEventListener("click", translateAndSpeak);
 
 // ========================
-// SPEAK FUNCTION
+// SPEAK FUNCTION (FIXED)
 // ========================
-function speakText() {
+async function speakText() {
   const text = result.innerText;
   if (!text) return;
 
   speechSynthesis.cancel();
 
-  const speech = new SpeechSynthesisUtterance(text);
-  const voices = speechSynthesis.getVoices();
+  const voices = await waitForVoices();
 
-  // selected voice
+  const speech = new SpeechSynthesisUtterance(text);
+
+  // selected voice from dropdown
   let selectedVoice = voices.find(v => v.name === voiceSelect.value);
 
   // fallback by language
@@ -84,9 +106,7 @@ function speakText() {
 
   speech.lang = langMap[targetLang.value] || "en-US";
 
-  setTimeout(() => {
-    speechSynthesis.speak(speech);
-  }, 100);
+  speechSynthesis.speak(speech);
 }
 
 // ========================
