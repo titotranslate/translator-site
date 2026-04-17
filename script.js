@@ -39,7 +39,10 @@ async function translateAndSpeak() {
 
     // IMPORTANT FIX:
     speechSynthesis.cancel();
-    speakText();
+    setTimeout(() => {
+  speechSynthesis.cancel();
+  speakText();
+}, 10);
 
   } catch (err) {
     console.error(err);
@@ -47,7 +50,9 @@ async function translateAndSpeak() {
   }
 }
 
-document.getElementById("translateBtn").addEventListener("click", translateAndSpeak);
+document.getElementById("translateBtn").addEventListener("click", async () => {
+  await translateAndSpeak();
+});
 
 // ========================
 // SPEAK (SIMPLE + STABLE)
