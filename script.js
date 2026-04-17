@@ -108,44 +108,20 @@ function loadVoices() {
   );
 
   const finalVoices = filteredVoices.length ? filteredVoices : voices;
-const cleanVoices = finalVoices.filter(voice => {
-  const name = voice.name.toLowerCase();
 
-  return !(
-    name.includes("wobble") ||
-    name.includes("bubbles") ||
-    name.includes("organ") ||
-    name.includes("whisper") ||
-    name.includes("echo")
-  );
-});
+  const cleanVoices = finalVoices.filter(voice => {
+    const name = voice.name.toLowerCase();
 
-cleanVoices.forEach(voice => {
-  const option = document.createElement("option");
-  option.value = voice.name;
-  option.textContent = `${voice.name} (${voice.lang})`;
-  voiceSelect.appendChild(option);
-});
-const cleanVoices = finalVoices.filter(voice => {
-  const name = voice.name.toLowerCase();
+    return !(
+      name.includes("wobble") ||
+      name.includes("bubbles") ||
+      name.includes("organ") ||
+      name.includes("whisper") ||
+      name.includes("echo")
+    );
+  });
 
-  return !(
-    name.includes("wobble") ||
-    name.includes("bubbles") ||
-    name.includes("organ") ||
-    name.includes("whisper") ||
-    name.includes("echo")
-  );
-});
-
-cleanVoices.forEach(voice => {
-  const option = document.createElement("option");
-  option.value = voice.name;
-  option.textContent = `${voice.name} (${voice.lang})`;
-  voiceSelect.appendChild(option);
-});
-
-  finalVoices.forEach(voice => {
+  cleanVoices.forEach(voice => {
     const option = document.createElement("option");
     option.value = voice.name;
     option.textContent = `${voice.name} (${voice.lang})`;
