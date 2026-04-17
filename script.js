@@ -1,4 +1,3 @@
-
 // ========================
 // DOM ELEMENTS
 // ========================
@@ -30,7 +29,7 @@ async function translateAndSpeak() {
       const cleanText = data.translation.replace(/^"|"$/g, "");
       result.innerText = cleanText;
 
-      // store language
+      // store detected language
       result.dataset.detectedLang = data.detectedLang || targetLang.value;
 
       // auto speak
@@ -49,38 +48,33 @@ async function translateAndSpeak() {
 document.getElementById("translateBtn").addEventListener("click", translateAndSpeak);
 
 // ========================
-// SPEAK FUNCTION (FIXED)
+// SPEAK FUNCTION
 // ========================
 function speakText() {
   const text = result.innerText;
   if (!text) return;
 
-  console.log("SPEAK FUNCTION TRIGGERED");
-  // Stop previous speech
   speechSynthesis.cancel();
 
   const speech = new SpeechSynthesisUtterance(text);
   const voices = speechSynthesis.getVoices();
 
-// Try to use selected voice first
-let selectedVoice = voices.find(
-  v => v.name === voiceSelect.value
-);
+  // selected voice
+  let selectedVoice = voices.find(v => v.name === voiceSelect.value);
 
-// If no selection, pick a good default for the language
-if (!selectedVoice) {
-  selectedVoice = voices.find(v =>
-    v.lang.toLowerCase().startsWith(targetLang.value)
-  );
-}
+  // fallback by language
+  if (!selectedVoice) {
+    selectedVoice = voices.find(v =>
+      v.lang.toLowerCase().startsWith(targetLang.value)
+    );
+  }
 
-// Apply voice if found
-if (selectedVoice) {
-  speech.voice = selectedVoice;
-}
- speech.rate = parseFloat(speedRange.value || 1);
+  if (selectedVoice) {
+    speech.voice = selectedVoice;
+  }
 
-  // Try to match language
+  speech.rate = parseFloat(speedRange.value || 1);
+
   const langMap = {
     en: "en-US",
     es: "es-ES",
@@ -90,37 +84,16 @@ if (selectedVoice) {
 
   speech.lang = langMap[targetLang.value] || "en-US";
 
- setTimeout(() => {
-  speechSynthesis.speak(speech);
-}, 100);
+  setTimeout(() => {
+    speechSynthesis.speak(speech);
+  }, 100);
 }
 
 // ========================
-// VOICE SYSTEM (CLEAN)
+// VOICE SYSTEM
 // ========================
 function loadVoices() {
-  const cleanVoices = finalVoices.filter(voice => {
-  const name = voice.name.toLowerCase();
-
-  return !(
-    name.includes("wobble") ||
-    name.includes("bubbles") ||
-    name.includes("organ") ||
-    name.includes("whisper") ||
-    name.includes("echo") ||
-    name.includes("albert") ||
-    name.includes("bad news") ||
-    name.includes("bahh") ||
-    name.includes("bells") ||
-    name.includes("boing") ||
-    name.includes("cellos") ||
-    name.includes("good news") ||
-    name.includes("jester") ||
-    name.includes("superstar") ||
-    name.includes("trinoids") ||
-    name.includes("zarvox")
-  );
-});
+  const voices = speechSynthesis.getVoices();
 
   voiceSelect.innerHTML = "";
 
@@ -138,7 +111,18 @@ function loadVoices() {
       name.includes("bubbles") ||
       name.includes("organ") ||
       name.includes("whisper") ||
-      name.includes("echo")
+      name.includes("echo") ||
+      name.includes("albert") ||
+      name.includes("bad news") ||
+      name.includes("bahh") ||
+      name.includes("bells") ||
+      name.includes("boing") ||
+      name.includes("cellos") ||
+      name.includes("good news") ||
+      name.includes("jester") ||
+      name.includes("superstar") ||
+      name.includes("trinoids") ||
+      name.includes("zarvox")
     );
   });
 
@@ -150,12 +134,14 @@ function loadVoices() {
   });
 }
 
-// Load voices when ready
+// ========================
+// EVENTS
+// ========================
 speechSynthesis.onvoiceschanged = loadVoices;
 
-// Reload when language changes
 targetLang.addEventListener("change", loadVoices);
 
 document.getElementById("speakBtn").addEventListener("click", speakText);
-// Initial load (important for some browsers)
+
+// initial load
 loadVoices();
