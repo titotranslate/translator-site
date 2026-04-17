@@ -16,15 +16,6 @@ const inputText = document.getElementById("inputText");
 const result = document.getElementById("result");
 const targetLang = document.getElementById("targetLang");
 const voiceSelect = document.getElementById("voiceSelect");
-const speedRange = document.getElementById("speedRange");
-const speedValue = document.getElementById("speedValue");
-
-// ========================
-// SPEED DISPLAY
-// ========================
-speedRange.addEventListener("input", () => {
-  speedValue.innerText = speedRange.value;
-});
 
 // ========================
 // STEP 2 — TRANSLATE FUNCTION
