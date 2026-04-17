@@ -92,20 +92,40 @@ function loadVoices() {
 
   voiceSelect.innerHTML = "";
 
-  const filtered = voices.filter(v =>
-    v.lang.toLowerCase().startsWith(targetLang.value)
-  );
+  const lang = targetLang.value;
 
-  const list = filtered.length ? filtered : voices;
+  const filtered = voices.filter(v => {
+    const name = v.name.toLowerCase();
+    const langMatch = v.lang.toLowerCase().startsWith(lang);
 
-  list.forEach(v => {
+    const isBadVoice =
+      name.includes("wobble") ||
+      name.includes("bubbles") ||
+      name.includes("organ") ||
+      name.includes("whisper") ||
+      name.includes("echo") ||
+      name.includes("albert") ||
+      name.includes("bad news") ||
+      name.includes("bahh") ||
+      name.includes("bells") ||
+      name.includes("boing") ||
+      name.includes("cellos") ||
+      name.includes("good news") ||
+      name.includes("jester") ||
+      name.includes("superstar") ||
+      name.includes("trinoids") ||
+      name.includes("zarvox");
+
+    return langMatch && !isBadVoice;
+  });
+
+  filtered.forEach(v => {
     const option = document.createElement("option");
     option.value = v.name;
     option.textContent = `${v.name} (${v.lang})`;
     voiceSelect.appendChild(option);
   });
 }
-
 // ========================
 // EVENTS
 // ========================
