@@ -37,7 +37,8 @@ async function translateAndSpeak() {
 
     result.dataset.detectedLang = data.detectedLang || targetLang.value;
 
-    // speak immediately (NO DELAYS, NO PROMISES)
+    // IMPORTANT FIX:
+    speechSynthesis.cancel();
     speakText();
 
   } catch (err) {
