@@ -55,6 +55,7 @@ function speakText() {
   const text = result.innerText;
   if (!text) return;
 
+  console.log("SPEAK FUNCTION TRIGGERED");
   // Stop previous speech
   speechSynthesis.cancel();
 
