@@ -99,7 +99,28 @@ if (selectedVoice) {
 // VOICE SYSTEM (CLEAN)
 // ========================
 function loadVoices() {
-  const voices = speechSynthesis.getVoices();
+  const cleanVoices = finalVoices.filter(voice => {
+  const name = voice.name.toLowerCase();
+
+  return !(
+    name.includes("wobble") ||
+    name.includes("bubbles") ||
+    name.includes("organ") ||
+    name.includes("whisper") ||
+    name.includes("echo") ||
+    name.includes("albert") ||
+    name.includes("bad news") ||
+    name.includes("bahh") ||
+    name.includes("bells") ||
+    name.includes("boing") ||
+    name.includes("cellos") ||
+    name.includes("good news") ||
+    name.includes("jester") ||
+    name.includes("superstar") ||
+    name.includes("trinoids") ||
+    name.includes("zarvox")
+  );
+});
 
   voiceSelect.innerHTML = "";
 
