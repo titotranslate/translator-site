@@ -77,7 +77,7 @@ function speakText() {
   const lang = targetLang.value;
   speech.lang = langMap[lang] || "en-US";
 
-  speech.rate = parseFloat(speedRange.value || 1);
+  speech.rate = 1;
 
   const voices = speechSynthesis.getVoices();
 
