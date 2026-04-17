@@ -1,4 +1,3 @@
-
 // ========================
 // DOM ELEMENTS
 // ========================
@@ -17,31 +16,7 @@ speedRange.addEventListener("input", () => {
 });
 
 // ========================
-// GET VOICES (SAFE)
-// ========================
-function getVoices() {
-  return new Promise(resolve => {
-    let voices = speechSynthesis.getVoices();
-    if (voices.length) return resolve(voices);
-
-    speechSynthesis.onvoiceschanged = () => {
-      resolve(speechSynthesis.getVoices());
-    };
-  });
-}
-
-// ========================
-// GLOBAL CACHE (IMPORTANT FIX)
-// ========================
-let cachedVoices = [];
-
-// preload voices early
-getVoices().then(v => {
-  cachedVoices = v;
-});
-
-// ========================
-// TRANSLATE FUNCTION
+// TRANSLATE
 // ========================
 async function translateAndSpeak() {
   const text = inputText.value.trim();
@@ -62,9 +37,7 @@ async function translateAndSpeak() {
 
     result.dataset.detectedLang = data.detectedLang || targetLang.value;
 
-    // 🚨 IMPORTANT FIX:
-    // DO NOT delay speech
-    // call speak directly (no setTimeout, no async gap)
+    // speak immediately (NO DELAYS, NO PROMISES)
     speakText();
 
   } catch (err) {
@@ -76,21 +49,15 @@ async function translateAndSpeak() {
 document.getElementById("translateBtn").addEventListener("click", translateAndSpeak);
 
 // ========================
-// SPEAK FUNCTION (FIXED FOR MOBILE)
+// SPEAK (SIMPLE + STABLE)
 // ========================
-async function speakText() {
+function speakText() {
   const text = result.innerText;
   if (!text) return;
 
   speechSynthesis.cancel();
 
-  // use cached voices first (prevents mobile delay bug)
-  let voices = cachedVoices.length ? cachedVoices : await getVoices();
-  cachedVoices = voices;
-
   const speech = new SpeechSynthesisUtterance(text);
-
-  speech.rate = parseFloat(speedRange.value || 1);
 
   const langMap = {
     en: "en-US",
@@ -102,6 +69,10 @@ async function speakText() {
   const lang = targetLang.value;
   speech.lang = langMap[lang] || "en-US";
 
+  speech.rate = parseFloat(speedRange.value || 1);
+
+  const voices = speechSynthesis.getVoices();
+
   let selectedVoice =
     voices.find(v => v.name === voiceSelect.value) ||
     voices.find(v => v.lang.toLowerCase().startsWith(lang));
@@ -110,49 +81,24 @@ async function speakText() {
     speech.voice = selectedVoice;
   }
 
-  // 🚨 CRITICAL FIX: NO DELAY (mobile blocks delayed speak)
   speechSynthesis.speak(speech);
 }
 
 // ========================
-// VOICE SYSTEM
+// VOICES
 // ========================
 function loadVoices() {
   const voices = speechSynthesis.getVoices();
-  cachedVoices = voices;
 
   voiceSelect.innerHTML = "";
 
-  const filteredVoices = voices.filter(v =>
+  const filtered = voices.filter(v =>
     v.lang.toLowerCase().startsWith(targetLang.value)
   );
 
-  const finalVoices = filteredVoices.length ? filteredVoices : voices;
+  const list = filtered.length ? filtered : voices;
 
-  const cleanVoices = finalVoices.filter(v => {
-    const name = v.name.toLowerCase();
-
-    return !(
-      name.includes("wobble") ||
-      name.includes("bubbles") ||
-      name.includes("organ") ||
-      name.includes("whisper") ||
-      name.includes("echo") ||
-      name.includes("albert") ||
-      name.includes("bad news") ||
-      name.includes("bahh") ||
-      name.includes("bells") ||
-      name.includes("boing") ||
-      name.includes("cellos") ||
-      name.includes("good news") ||
-      name.includes("jester") ||
-      name.includes("superstar") ||
-      name.includes("trinoids") ||
-      name.includes("zarvox")
-    );
-  });
-
-  cleanVoices.forEach(v => {
+  list.forEach(v => {
     const option = document.createElement("option");
     option.value = v.name;
     option.textContent = `${v.name} (${v.lang})`;
